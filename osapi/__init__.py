@@ -20,11 +20,17 @@
 
 
 import requests
-import urllib
+import json
+try:
+    # Python 3
+    from urllib.parse import urljoin
+except:
+    # Python 2
+    from urlparse import urljoin
 
 
-APIKEY = open("apikey").read().strip()
-
+def auth_header(apikey):
+    return { 'Authorization': 'ApiKey {key}'.format( key=apikey )}
 
 class OpenSpendingAPI(object):
     """Interacts with the OpenSpending API"""
@@ -32,50 +38,48 @@ class OpenSpendingAPI(object):
         self.url = url
         self.apikey = apikey
 
-    def get_header(self):
-        return { 'Authorization': 'ApiKey {key}'.format( key=self.apikey )}
-
     def create_resource_package(self, budget_url):
         """docstring for create_resource"""
-        create_url = urllib.parse.urljoin(self.url, '/api/2/new')
+        create_url = urljoin(self.url, '/api/2/new')
         parameters = {'budget_data_package': budget_url}
         response = requests.post(create_url, params=parameters,
-                                 headers=self.get_header())
+                                 headers=auth_header(self.apikey))
 
     def create_resource_csv(self, csv_file, metadata):
         """docstring for create_resource"""
-        create_url = urllib.parse.urljoin(self.url, '/api/2/new')
+        create_url = urljoin(self.url, '/api/2/new')
         parameters = {
             'csv_file': csv_file,
             'metadata': metadata,
         }
         response = requests.post(create_url, params=parameters,
-                                 headers=self.get_header())
-        open("a.html", 'w').write(response.text)
+                                 headers=auth_header(self.apikey))
+        dataset_name = json.loads(response.text)['name']
+        #open("a.html", 'w').write(response.text)
+        return Dataset(dataset_name, self.url, self.apikey)
 
 class Dataset(object):
     """Interacts with an OpenSpending Dataset"""
-    def __init__(self, name, apikey):
+    def __init__(self, name, url, apikey):
         self.name = name
+        self.url = url
         self.apikey = apikey
 
     def delete_dataset(self):
         """Deletes the dataset"""
-        url = urllib.parse.urljoin(self.url, self.name + "/editor/delete")
-        response = requests.post(url, headers=self.get_header())
+        url = urljoin(self.url, self.name + "/editor/delete")
+        response = requests.post(url, headers=auth_header(self.apikey))
         #open("a.html", 'w').write(response.text)
 
     def list_sources(self):
-        https://openspending.org/02o2do982o2do982/sources.json
+        pass
+        #https://openspending.org/02o2do982o2do982/sources.json
     def delete_source(self, source):
-        https://openspending.org/02o2do982o2do982/sources/10832/delete
+        pass
+        #https://openspending.org/02o2do982o2do982/sources/10832/delete
     def retract_all(self):
-        https://openspending.org/02o2do982o2do982/editor/retract
+        pass
+        #https://openspending.org/02o2do982o2do982/editor/retract
     def delete_loaded(self):
-        https://openspending.org/02o2do982o2do982/editor/drop
-        
-osapi = OpenSpendingAPI("https://openspending.org", APIKEY)
-json = "https://devcolab.each.usp.br/owncloud/public.php?service=files&t=f4a2b677b00fd7f286c6276a9aef155c&download"
-csv = "http://mk.ucant.org/info/data/sample-openspending-dataset.csv"
-#osapi.create_resource_csv(csv, json)
-osapi.delete_dataset("02o2diiiiiiiiiii")
+        pass
+        #https://openspending.org/02o2do982o2do982/editor/drop
