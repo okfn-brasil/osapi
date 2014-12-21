@@ -38,15 +38,15 @@ class OpenSpendingAPI(object):
         self.url = url
         self.apikey = apikey
 
-    def create_resource_package(self, budget_url):
-        """docstring for create_resource"""
-        create_url = urljoin(self.url, '/api/2/new')
-        parameters = {'budget_data_package': budget_url}
-        response = requests.post(create_url, params=parameters,
-                                 headers=auth_header(self.apikey))
+    #def create_resource_package(self, budget_url):
+    #    """docstring for create_resource"""
+    #    create_url = urljoin(self.url, '/api/2/new')
+    #    parameters = {'budget_data_package': budget_url}
+    #    response = requests.post(create_url, params=parameters,
+    #                             headers=auth_header(self.apikey))
 
-    def create_resource_csv(self, csv_file, metadata):
-        """docstring for create_resource"""
+    def create_dataset(self, csv_file, metadata):
+        """Creates a Dataset based on the csv_file in metadata. Returns it."""
         create_url = urljoin(self.url, '/api/2/new')
         parameters = {
             'csv_file': csv_file,
@@ -54,8 +54,9 @@ class OpenSpendingAPI(object):
         }
         response = requests.post(create_url, params=parameters,
                                  headers=auth_header(self.apikey))
+        print(response.text)
+        # TODO: Error check!
         dataset_name = json.loads(response.text)['name']
-        #open("a.html", 'w').write(response.text)
         return Dataset(dataset_name, self.url, self.apikey)
 
 class Dataset(object):
